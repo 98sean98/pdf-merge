@@ -78,8 +78,8 @@ const PDFFrame: FC<PDFFrameProps> = ({ pdfFile, rows, columns }) => {
   }, [pdfFile]);
 
   return (
-    <Box mt={8} flex={1} position={"relative"}>
-      <iframe ref={pdfRef} width="100%" height="100%" title={"pdf"} />;
+    <Box h={"full"} position={"relative"}>
+      <iframe ref={pdfRef} width="100%" height="100%" title={"pdf"} />
       {loading ? (
         <Center pos={"absolute"} inset={0}>
           <Text>Loading</Text>

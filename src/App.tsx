@@ -18,8 +18,8 @@ function App() {
   const [columns, setColumns] = useState<number>(2);
 
   return (
-    <Flex p={8} direction={"column"} h={"100vh"}>
-      <Box>
+    <Flex p={8} h={"100vh"}>
+      <Box mr={20} w={"lg"}>
         <FileInput
           id={"pdf-file"}
           setValue={setPdfFile}
@@ -52,7 +52,9 @@ function App() {
         </HStack>
       </Box>
 
-      <PDFFrame pdfFile={pdfFile} rows={rows} columns={columns} />
+      <Box flex={1} h={"100%"}>
+        <PDFFrame pdfFile={pdfFile} rows={rows} columns={columns} />
+      </Box>
     </Flex>
   );
 }
