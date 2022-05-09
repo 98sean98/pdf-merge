@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from "react";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, PageSizes } from "pdf-lib";
 import { Box, Center, Text } from "@chakra-ui/react";
 
 interface PDFFrameProps {
@@ -24,6 +24,27 @@ const PDFFrame: FC<PDFFrameProps> = ({ pdfFile, rows, columns }) => {
         { length: sourcePdfDoc.getPageCount() },
         (_, i) => i
       );
+
+      const emptyPage = pdfDoc.addPage(PageSizes.A4);
+      const pageSize = emptyPage.getSize();
+
+      const embeddedPageWidth = pageSize.width / columns;
+      const embeddedPageHeight = pageSize.height / rows;
+
+      const sourcePages = sourcePdfDoc.getPages();
+
+      sourcePages.forEach((page, i) => {
+        const currentSize = page.getSize();
+        const scale = Math.min(
+          embeddedPageHeight / currentSize.height,
+          embeddedPageWidth / currentSize.width
+        );
+        page.scale(scale, scale);
+      });
+
+      // remove empty page
+      pdfDoc.removePage(0);
+
       const embeddedPages = await pdfDoc.embedPdf(sourcePdfDoc, ar);
 
       const elementCount = rows * columns;
@@ -33,11 +54,8 @@ const PDFFrame: FC<PDFFrameProps> = ({ pdfFile, rows, columns }) => {
           i * elementCount,
           (i + 1) * elementCount
         );
-        const page = pdfDoc.addPage();
-        const pageSize = page.getSize();
+        const page = pdfDoc.addPage(PageSizes.A4);
 
-        const embeddedPageWidth = pageSize.width / columns;
-        const embeddedPageHeight = pageSize.height / rows;
         const xPositions = Array.from(
           { length: columns },
           (_, i) => i * embeddedPageWidth
@@ -48,18 +66,12 @@ const PDFFrame: FC<PDFFrameProps> = ({ pdfFile, rows, columns }) => {
         );
 
         subsetPages.forEach((embeddedPage, index) => {
-          const scale = Math.min(
-            embeddedPageHeight / embeddedPage.height,
-            embeddedPageWidth / embeddedPage.width
-          );
           const columnIndex = index % columns,
             rowIndex = Math.floor(index / columns);
-          const width = embeddedPage.width * scale,
-            height = embeddedPage.height * scale,
-            x = xPositions[columnIndex],
+          const x = xPositions[columnIndex],
             y = yPositions[rowIndex];
 
-          page.drawPage(embeddedPage, { x, y, width, height });
+          page.drawPage(embeddedPage, { x, y });
         });
       }
 
